@@ -3,15 +3,24 @@ syntax = "proto3";
 package api;
 
 service wallet_api {
-    rpc Signature0(SignAdd_pass_hashMessage) returns(SignatureMessage){};
+    rpc CreateWallet(PasswordMessage) returns(AddressMessage){};
+    rpc Signature(AddressPasswordHashMessage) returns(SignatureMessage){};
 }
 
-message SignAdd_pass_hashMessage {
-  string address = 1;
-  string password = 2;
-  bytes hash = 3;
+message AddressPasswordHashMessage {
+    string address = 1;
+    string password = 2;
+    bytes hash = 3;
 }
 
 message SignatureMessage {
-  bytes signature = 1;
+    bytes signature = 1;
+}
+
+message PasswordMessage {
+    string password = 1;
+}
+
+message AddressMessage {
+    string address = 1;
 }
