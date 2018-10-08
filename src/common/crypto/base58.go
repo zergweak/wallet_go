@@ -9,9 +9,13 @@ import (
 var b58Alphabet = []byte("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
 
 func ReverseBytes(input []byte) {
-	max := len(input)/2
+	size := len(input)
+	max := size/2
+	size--
 	for i :=0 ; i < max; i++{
 		b := input[i];
+		input[i] = input[size-i]
+		input[size-i] = b
 	}
 }
 
@@ -69,17 +73,13 @@ func Base58Decode(str string) []byte {
 	return decoded
 }
 
-// b58checkencode encodes version ver and byte slice b into a base-58 check encoded string.
-func B58checkencode(ver uint8, b []byte) (s string) {
-	/* Prepend version */
-	bcpy := append([]byte{ver}, b...)
-
+func B58checkencode(b []byte) (s string) {
 	/* Create a new SHA256 context */
 	sha256H := sha256.New()
 
 	/* SHA256 Hash #1 */
 	sha256H.Reset()
-	sha256H.Write(bcpy)
+	sha256H.Write(b)
 	hash1 := sha256H.Sum(nil)
 
 	/* SHA256 Hash #2 */
@@ -88,13 +88,13 @@ func B58checkencode(ver uint8, b []byte) (s string) {
 	hash2 := sha256H.Sum(nil)
 
 	/* Append first four bytes of hash */
-	bcpy = append(bcpy, hash2[0:4]...)
+	b = append(b, hash2[0:4]...)
 
 	/* Encode base58 string */
-	s = Base58Encode(bcpy)
+	s = Base58Encode(b)
 
 	/* For number of leading 0's in bytes, prepend 1 */
-	for _, v := range bcpy {
+	for _, v := range b {
 		if v != 0 {
 			break
 		}
