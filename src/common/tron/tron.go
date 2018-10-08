@@ -17,7 +17,7 @@ func sha3omit12(intput []byte) []byte {
 }
 
 func Pub2Address(p *ecdsa.PublicKey) string {
-	pubKey := cryp.FromECDSAPub(32,p)
+	pubKey := cryp.FromECDSAPub(32, p)
 	address := sha3omit12(pubKey)
 	base58 := cryp.B58checkencode(0x00, address)
 	return base58

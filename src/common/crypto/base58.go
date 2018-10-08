@@ -1,16 +1,72 @@
 package crypto
 
 import (
-	sha256 "crypto/sha256"
+	"crypto/sha256"
+	"math/big"
+	"bytes"
 )
+
 var b58Alphabet = []byte("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
 
-func Base58Encode(input []byte) string {
-	return ""
+func ReverseBytes(input []byte) {
+	max := len(input)/2
+	for i :=0 ; i < max; i++{
+		b := input[i];
+	}
 }
 
-func Base58Decode(string2 string) []byte {
-	return nil
+func Base58Encode(input []byte) string {
+	var result []byte
+
+	x := big.NewInt(0).SetBytes(input)
+
+	base := big.NewInt(int64(len(b58Alphabet)))
+	zero := big.NewInt(0)
+	mod := &big.Int{}
+
+	for x.Cmp(zero) != 0 {
+		x.DivMod(x, base, mod)
+		result = append(result, b58Alphabet[mod.Int64()])
+	}
+
+	ReverseBytes(result)
+
+	for _, b := range input {
+		if b == 0x00 {
+			result = append([]byte{b58Alphabet[0]}, result...)
+
+		} else {
+			break
+		}
+	}
+
+	return string(result[:])
+}
+
+func Base58Decode(str string) []byte {
+	input := []byte(str)
+	result := big.NewInt(0)
+	zeroBytes := 0
+
+	for _, b := range input {
+		if b != b58Alphabet[0] {
+			break
+		}
+
+		zeroBytes++
+	}
+
+	payload := input[zeroBytes:]
+	for _, b := range payload {
+		charIndex := bytes.IndexByte(b58Alphabet, b)
+		result.Mul(result, big.NewInt(int64(len(b58Alphabet))))
+		result.Add(result, big.NewInt(int64(charIndex)))
+	}
+
+	decoded := result.Bytes()
+	decoded = append(bytes.Repeat([]byte{byte(0x00)}, zeroBytes), decoded...)
+
+	return decoded
 }
 
 // b58checkencode encodes version ver and byte slice b into a base-58 check encoded string.
