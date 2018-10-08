@@ -4,7 +4,7 @@ import (
 	"google.golang.org/grpc"
 	"golang.org/x/net/context"
 	"log"
-	pb "../../gen/api"
+	pb "../api"
 )
 
 const (

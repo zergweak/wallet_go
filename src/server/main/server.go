@@ -7,7 +7,7 @@ import (
 	"log"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pb "../../../gen/api"
+	pb "../../api"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto"
