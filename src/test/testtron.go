@@ -2,16 +2,14 @@ package main
 
 import (
 	"fmt"
-	"crypto/ecdsa"
-	"crypto/elliptic"
 	"../common/tron"
-	"crypto/rand"
 	"encoding/hex"
+	"../common/crypto/secp256k1"
 )
 
 func main() {
-	curve := elliptic.P256()
-	priv, err := ecdsa.GenerateKey(curve, rand.Reader)
+	c := secp256k1.S256()
+	priv, err := secp256k1.NewPrivateKey(c)
 	if err != nil {
 		fmt.Printf(err.Error())
 		return
