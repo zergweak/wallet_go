@@ -15,9 +15,30 @@ const (
 	address = "localhost:50051"
 )
 
+func inputpassword() string {
+	for {
+		fmt.Println("Please input your password!")
+		input := bufio.NewScanner(os.Stdin)
+		input.Scan()
+		password := input.Text()
+
+		fmt.Println("Please input your password again!")
+		input = bufio.NewScanner(os.Stdin)
+		input.Scan()
+		password_1 := input.Text()
+
+		if password == password_1 {
+			return password
+		}
+		fmt.Println("Twice password diffrent, try again!")
+	}
+}
+
 func CreateWallet(conn *grpc.ClientConn) {
+
+	pwd := inputpassword()
 	c := pb.NewWalletApiClient(conn)
-	address, err := c.CreateWallet(context.Background(), &pb.PasswordMessage{Password: "123456"})
+	address, err := c.CreateWallet(context.Background(), &pb.PasswordMessage{Password: pwd})
 	if err != nil {
 		log.Fatal("CreateWallet faild: %v", err)
 	}
