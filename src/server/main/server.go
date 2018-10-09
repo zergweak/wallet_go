@@ -9,8 +9,9 @@ import (
 	"google.golang.org/grpc"
 	pb "../../api"
 	"crypto/ecdsa"
-	"crypto/elliptic"
-	tron "../../common/tron"
+	"../../common/tron"
+	"../../common/crypto/secp256k1"
+	"crypto/rand"
 )
 
 const (
@@ -27,8 +28,8 @@ func (s *server) Signature(ctx context.Context, in *pb.AddressPasswordHashMessag
 }
 
 func (s *server) CreateWallet(ctx context.Context, in *pb.PasswordMessage) (*pb.AddressMessage, error) {
-	curve := elliptic.P256()
-	priv, err := ecdsa.GenerateKey(curve, nil)
+	curve := secp256k1.S256()
+	priv, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
 		return nil, err
 	}
