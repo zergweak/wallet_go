@@ -1,0 +1,13 @@
+package: .
+import:
+- package: common
+  subpackages:
+  - crypto/secp256k1
+  - crypto/sha3
+  - math
+- package: github.com/golang/protobuf
+  version: ~1.2.0
+  subpackages:
+  - proto
+- package: golang.org/x/net/context
+- package: google.golang.org/grpc

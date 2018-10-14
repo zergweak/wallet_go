@@ -35,7 +35,6 @@ func inputpassword() string {
 }
 
 func CreateWallet(conn *grpc.ClientConn) {
-
 	pwd := inputpassword()
 	c := pb.NewWalletApiClient(conn)
 	address, err := c.CreateWallet(context.Background(), &pb.PasswordMessage{Password: pwd})

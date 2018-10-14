@@ -10,9 +10,9 @@ var b58Alphabet = []byte("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuv
 
 func ReverseBytes(input []byte) {
 	size := len(input)
-	max := size/2
+	max := size / 2
 	size--
-	for i :=0 ; i < max; i++{
+	for i := 0; i < max; i++ {
 		b := input[i];
 		input[i] = input[size-i]
 		input[size-i] = b
@@ -38,7 +38,6 @@ func Base58Encode(input []byte) string {
 	for _, b := range input {
 		if b == 0x00 {
 			result = append([]byte{b58Alphabet[0]}, result...)
-
 		} else {
 			break
 		}
@@ -56,7 +55,6 @@ func Base58Decode(str string) []byte {
 		if b != b58Alphabet[0] {
 			break
 		}
-
 		zeroBytes++
 	}
 
