@@ -1,10 +1,10 @@
 package tron
 
 import (
-	cryp "../crypto"
+	cryp "common/crypto"
 	"crypto"
 	"crypto/ecdsa"
-	_ "../crypto/sha3"
+	_ "common/crypto/sha3"
 )
 
 func sha3omit12(input []byte) []byte {

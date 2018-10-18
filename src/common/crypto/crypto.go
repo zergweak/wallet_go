@@ -27,10 +27,10 @@ import (
 	"io/ioutil"
 	"math/big"
 	"os"
-	"../../common/crypto/secp256k1"
-	"../../common"
-	"../../common/crypto/sha3"
-	"../../common/math"
+	"common/crypto/secp256k1"
+	"common"
+	"common/crypto/sha3"
+	"common/math"
 )
 
 var (

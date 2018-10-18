@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"strings"
 
-	"../common/hexutil"
-	"./crypto/sha3"
+	"common/hexutil"
+	"common/crypto/sha3"
 )
 
 // Lengths of hashes and addresses in bytes.

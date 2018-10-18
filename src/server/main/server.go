@@ -7,10 +7,10 @@ import (
 	"log"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pb "../../api"
+	pb "api"
 	"crypto/ecdsa"
-	"../../common/tron"
-	"../../common/crypto/secp256k1"
+	"common/tron"
+	"common/crypto/secp256k1"
 	"crypto/rand"
 )
 

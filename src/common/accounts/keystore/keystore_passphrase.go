@@ -37,13 +37,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"../../../common/uuid"
+	"common/uuid"
 	"common"
 	"common/crypto"
 	"common/math"
-	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/scrypt"
-	"errors"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 const (
@@ -67,12 +66,6 @@ const (
 
 	scryptR     = 8
 	scryptDKLen = 32
-)
-
-var (
-//	ErrLocked  = accounts.NewAuthNeededError("password or unlock")
-	ErrNoMatch = errors.New("no key for given address or file")
-	ErrDecrypt = errors.New("could not decrypt key with given passphrase")
 )
 
 type keyStorePassphrase struct {

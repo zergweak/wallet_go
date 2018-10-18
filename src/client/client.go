@@ -4,7 +4,7 @@ import (
 	"google.golang.org/grpc"
 	"golang.org/x/net/context"
 	"log"
-	pb "../api"
+	pb "api"
 	"os"
 	"fmt"
 	"bufio"

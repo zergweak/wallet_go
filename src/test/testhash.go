@@ -4,7 +4,7 @@ import (
 	"crypto"
 	"encoding/hex"
 	"fmt"
-	_ "../common/crypto/sha3"
+	_ "common/crypto/sha3"
 )
 
 func main()  {

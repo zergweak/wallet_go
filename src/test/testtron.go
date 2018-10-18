@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"../common/tron"
+	"common/tron"
 	"encoding/hex"
-	"../common/crypto/secp256k1"
+	"common/crypto/secp256k1"
 	"strings"
 )
 

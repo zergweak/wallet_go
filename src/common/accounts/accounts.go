@@ -18,7 +18,7 @@
 package accounts
 
 import (
-	"../../common"
+	"common"
 )
 
 // Account represents an Ethereum account located at a specific location defined

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"../common/crypto"
+	"common/crypto"
 	"encoding/hex"
 	"fmt"
 )

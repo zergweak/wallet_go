@@ -1,8 +1,8 @@
 package keystore
 
 import (
-	"../../../common"
-	"../../../common/uuid"
+	"common"
+	"common/uuid"
 	"crypto/ecdsa"
 	"io"
 	"common/accounts"

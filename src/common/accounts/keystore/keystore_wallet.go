@@ -63,3 +63,33 @@ func (w *keystoreWallet) Accounts() []accounts.Account {
 func (w *keystoreWallet) Contains(account accounts.Account) bool {
 	return account.Address == w.account.Address && (account.URL == w.account.URL)
 }
+
+// SignHash implements accounts.Wallet, attempting to sign the given hash with
+// the given account. If the wallet does not wrap this particular account, an
+// error is returned to avoid account leakage (even though in theory we may be
+// able to sign via our shared keystore backend).
+func (w *keystoreWallet) SignHash(account accounts.Account, hash []byte) ([]byte, error) {
+	// Make sure the requested account is contained within
+	if account.Address != w.account.Address {
+		return nil, accounts.ErrUnknownAccount
+	}
+	if account.URL != (accounts.URL{}) && account.URL != w.account.URL {
+		return nil, accounts.ErrUnknownAccount
+	}
+	// Account seems valid, request the keystore to sign
+	return w.keystore.SignHash(account, hash)
+}
+
+// SignHashWithPassphrase implements accounts.Wallet, attempting to sign the
+// given hash with the given account using passphrase as extra authentication.
+func (w *keystoreWallet) SignHashWithPassphrase(account accounts.Account, passphrase string, hash []byte) ([]byte, error) {
+	// Make sure the requested account is contained within
+	if account.Address != w.account.Address {
+		return nil, accounts.ErrUnknownAccount
+	}
+	if account.URL != (accounts.URL{}) && account.URL != w.account.URL {
+		return nil, accounts.ErrUnknownAccount
+	}
+	// Account seems valid, request the keystore to sign
+	return w.keystore.SignHashWithPassphrase(account, passphrase, hash)
+}
