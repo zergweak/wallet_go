@@ -5,8 +5,10 @@ import (
 	"common"
 	"common/accounts"
 	"runtime"
-	"github.com/sasaxie/go-client-api/common/crypto"
 	"errors"
+	"path/filepath"
+	"github.com/sasaxie/go-client-api/common/crypto"
+	crand "crypto/rand"
 )
 
 var (
@@ -22,10 +24,10 @@ type KeyStore struct {
 	changes  chan struct{}                // Channel receiving change notifications from the cache
 	unlocked map[common.Address]*unlocked // Currently unlocked account (decrypted private keys)
 
-	wallets     []accounts.Wallet       // Wallet wrappers around the individual key files
-//	updateFeed  event.Feed              // Event feed to notify wallet additions/removals
-//	updateScope event.SubscriptionScope // Subscription scope tracking current live listeners
-	updating    bool                    // Whether the event notification loop is running
+	wallets []accounts.Wallet // Wallet wrappers around the individual key files
+	//	updateFeed  event.Feed              // Event feed to notify wallet additions/removals
+	//	updateScope event.SubscriptionScope // Subscription scope tracking current live listeners
+	updating bool // Whether the event notification loop is running
 
 	mu sync.RWMutex
 }
@@ -40,7 +42,7 @@ func newAccountCache(keydir string) (*accountCache, chan struct{}) {
 		keydir: keydir,
 		byAddr: make(map[common.Address][]accounts.Account),
 		notify: make(chan struct{}, 1),
-	//	fileC:  fileCache{all: mapset.NewThreadUnsafeSet()},
+		//	fileC:  fileCache{all: mapset.NewThreadUnsafeSet()},
 	}
 	ac.watcher = newWatcher(ac)
 	return ac, ac.notify
@@ -71,7 +73,7 @@ func (ks *KeyStore) init(keydir string) {
 
 // Find resolves the given account into a unique entry in the keystore.
 func (ks *KeyStore) Find(a accounts.Account) (accounts.Account, error) {
-	ks.cache.maybeReload()
+	//ks.cache.maybeReload()
 	ks.cache.mu.Lock()
 	a, err := ks.cache.find(a)
 	ks.cache.mu.Unlock()
@@ -112,4 +114,25 @@ func (ks *KeyStore) SignHashWithPassphrase(a accounts.Account, passphrase string
 	}
 	defer zeroKey(key.PrivateKey)
 	return crypto.Sign(hash, key.PrivateKey)
+}
+
+// NewKeyStore creates a keystore for the given directory.
+func NewKeyStore(keydir string, scryptN, scryptP int) *KeyStore {
+	keydir, _ = filepath.Abs(keydir)
+	ks := &KeyStore{storage: &keyStorePassphrase{keydir, scryptN, scryptP, false}}
+	ks.init(keydir)
+	return ks
+}
+
+// NewAccount generates a new key and stores it into the key directory,
+// encrypting it with the passphrase.
+func (ks *KeyStore) NewAccount(passphrase string) (accounts.Account, error) {
+	_, account, err := storeNewKey(ks.storage, crand.Reader, passphrase)
+	if err != nil {
+		return accounts.Account{}, err
+	}
+	// Add the account to the cache immediately rather
+	// than waiting for file system notifications to pick it up.
+	ks.cache.add(account)
+	return account, nil
 }

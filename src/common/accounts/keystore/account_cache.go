@@ -55,7 +55,7 @@ func (w *watcher) start() {
 		return
 	}
 	w.starting = true
-	go w.loop()
+	//go w.loop()
 }
 
 func (ac *accountCache) close() {
@@ -71,32 +71,32 @@ func (ac *accountCache) close() {
 	ac.mu.Unlock()
 }
 
-func (ac *accountCache) maybeReload() {
-	ac.mu.Lock()
-
-	if ac.watcher.running {
-		ac.mu.Unlock()
-		return // A watcher is running and will keep the cache up-to-date.
-	}
-	if ac.throttle == nil {
-		ac.throttle = time.NewTimer(0)
-	} else {
-		select {
-		case <-ac.throttle.C:
-		default:
-			ac.mu.Unlock()
-			return // The cache was reloaded recently.
-		}
-	}
-	// No watcher running, start it.
-	ac.watcher.start()
-	ac.throttle.Reset(minReloadInterval)
-	ac.mu.Unlock()
-	ac.scanAccounts()
-}
+//func (ac *accountCache) maybeReload() {
+//	ac.mu.Lock()
+//
+//	if ac.watcher.running {
+//		ac.mu.Unlock()
+//		return // A watcher is running and will keep the cache up-to-date.
+//	}
+//	if ac.throttle == nil {
+//		ac.throttle = time.NewTimer(0)
+//	} else {
+//		select {
+//		case <-ac.throttle.C:
+//		default:
+//			ac.mu.Unlock()
+//			return // The cache was reloaded recently.
+//		}
+//	}
+//	// No watcher running, start it.
+//	ac.watcher.start()
+//	ac.throttle.Reset(minReloadInterval)
+//	ac.mu.Unlock()
+//	ac.scanAccounts()
+//}
 
 func (ac *accountCache) accounts() []accounts.Account {
-	ac.maybeReload()
+	//ac.maybeReload()
 	ac.mu.Lock()
 	defer ac.mu.Unlock()
 	cpy := make([]accounts.Account, len(ac.all))
@@ -138,4 +138,19 @@ func (ac *accountCache) find(a accounts.Account) (accounts.Account, error) {
 		sort.Sort(accountsByURL(err.Matches))
 		return accounts.Account{}, err
 	}
+}
+
+func (ac *accountCache) add(newAccount accounts.Account) {
+	ac.mu.Lock()
+	defer ac.mu.Unlock()
+
+	i := sort.Search(len(ac.all), func(i int) bool { return strings.Compare(ac.all[i].URL, newAccount.URL) >= 0 })
+	if i < len(ac.all) && ac.all[i] == newAccount {
+		return
+	}
+	// newAccount is not in the cache.
+	ac.all = append(ac.all, accounts.Account{})
+	copy(ac.all[i+1:], ac.all[i:])
+	ac.all[i] = newAccount
+	ac.byAddr[newAccount.Address] = append(ac.byAddr[newAccount.Address], newAccount)
 }

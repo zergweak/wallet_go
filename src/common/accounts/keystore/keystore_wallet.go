@@ -73,7 +73,7 @@ func (w *keystoreWallet) SignHash(account accounts.Account, hash []byte) ([]byte
 	if account.Address != w.account.Address {
 		return nil, accounts.ErrUnknownAccount
 	}
-	if account.URL != (accounts.URL{}) && account.URL != w.account.URL {
+	if account.URL != "" && account.URL != w.account.URL {
 		return nil, accounts.ErrUnknownAccount
 	}
 	// Account seems valid, request the keystore to sign
@@ -87,7 +87,7 @@ func (w *keystoreWallet) SignHashWithPassphrase(account accounts.Account, passph
 	if account.Address != w.account.Address {
 		return nil, accounts.ErrUnknownAccount
 	}
-	if account.URL != (accounts.URL{}) && account.URL != w.account.URL {
+	if account.URL != "" && account.URL != w.account.URL {
 		return nil, accounts.ErrUnknownAccount
 	}
 	// Account seems valid, request the keystore to sign

@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"io"
-	"./guuid"
+	"common/uuid/guuid"
 )
 
 // Array is a pass-by-value UUID that can be used as an effecient key in a map.

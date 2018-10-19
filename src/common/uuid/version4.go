@@ -4,7 +4,7 @@
 
 package uuid
 
-import "./guuid"
+import "common/uuid/guuid"
 
 // Random returns a Random (Version 4) UUID or panics.
 //

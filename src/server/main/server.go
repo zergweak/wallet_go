@@ -8,14 +8,14 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	pb "api"
-	"crypto/ecdsa"
-	"common/tron"
-	"common/crypto/secp256k1"
-	"crypto/rand"
+	"common/accounts/keystore"
+	cryp "common/crypto"
 )
 
 const (
-	port = ":50051"
+	port             = ":50051"
+	veryLightScryptN = 2
+	veryLightScryptP = 1
 )
 
 type server struct{}
@@ -28,13 +28,12 @@ func (s *server) Signature(ctx context.Context, in *pb.AddressPasswordHashMessag
 }
 
 func (s *server) CreateWallet(ctx context.Context, in *pb.PasswordMessage) (*pb.AddressMessage, error) {
-	curve := secp256k1.S256()
-	priv, err := ecdsa.GenerateKey(curve, rand.Reader)
-	if err != nil {
+	ks := keystore.NewKeyStore("keystore", veryLightScryptN, veryLightScryptP)
+	a, err := ks.NewAccount("foo")
+	if nil != err {
 		return nil, err
 	}
-	address := tron.Pub2Address(&priv.PublicKey)
-
+	address := cryp.B58checkencode(a.Address.Bytes())
 	return &pb.AddressMessage{Address: address}, nil
 }
 
