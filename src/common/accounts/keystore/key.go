@@ -5,7 +5,6 @@ import (
 	"common/uuid"
 	"crypto/ecdsa"
 	"io"
-	"common/accounts"
 	"common/crypto"
 	"path/filepath"
 	"io/ioutil"
@@ -29,7 +28,6 @@ type Key struct {
 type cipherparamsJSON struct {
 	IV string `json:"iv"`
 }
-
 
 type encryptedKeyJSONV3 struct {
 	Address string     `json:"address"`
@@ -81,18 +79,17 @@ func newKey(rand io.Reader) (*Key, error) {
 	return newKeyFromECDSA(privateKeyECDSA), nil
 }
 
-func storeNewKey(ks keyStore, rand io.Reader, auth string) (*Key, accounts.Account, error) {
+func storeNewKey(ks keyStore, rand io.Reader, auth string) (*Key, string, error) {
 	key, err := newKey(rand)
 	if err != nil {
-		return nil, accounts.Account{}, err
+		return nil, "", err
 	}
-	a := accounts.Account{Address: key.Address}//, URL: accounts.URL{Scheme: KeyStoreScheme, Path: ks.JoinPath(keyFileName(key.Address))}}
-	address := cryp.B58checkencode(a.Address.Bytes())
+	address := cryp.B58checkencode(key.Address.Bytes())
 	if err := ks.StoreKey(address, key, auth); err != nil {
 		zeroKey(key.PrivateKey)
-		return nil, a, err
+		return nil, address, err
 	}
-	return key, a, err
+	return key, address, err
 }
 
 // zeroKey zeroes a private key in memory.
