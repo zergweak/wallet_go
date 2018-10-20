@@ -7,6 +7,7 @@ import (
 	crand "crypto/rand"
 	"os"
 	"io/ioutil"
+	"strings"
 )
 
 var (
@@ -31,7 +32,8 @@ func (ks *KeyStore) walkfunc(path string, info os.FileInfo, err error) error {
 	if err != nil {
 		return nil
 	}
-	account := keyStorePassphrase{path, ks.scryptN, ks.scryptP, false, keyjson}
+	temp := strings.Split(path, "/")
+	account := keyStorePassphrase{ks.keysDirPath, temp[len(temp)-1],ks.scryptN, ks.scryptP, false, keyjson}
 	ks.Accounts = append(ks.Accounts, account)
 	return nil
 }
@@ -84,12 +86,12 @@ func NewKeyStore(keydir string, scryptN, scryptP int) *KeyStore {
 // NewAccount generates a new key and stores it into the key directory,
 // encrypting it with the passphrase.
 func (ks *KeyStore) NewAccount(passphrase string) (string, error) {
-	account := keyStorePassphrase{ks.keysDirPath, ks.scryptN, ks.scryptP, false, nil}
+	account := keyStorePassphrase{ks.keysDirPath, "",ks.scryptN, ks.scryptP, false, nil}
 	_, address, err := storeNewKey(account, crand.Reader, passphrase)
 	if err != nil {
 		return "", err
 	}
-	account.keysDirPath = account.JoinPath(address)
+	account.address = address
 	ks.Accounts = append(ks.Accounts, account)
 	// Add the account to the cache immediately rather
 	// than waiting for file system notifications to pick it up.

@@ -38,12 +38,10 @@ import (
 	"os"
 	"path/filepath"
 	"common/uuid"
-	"common"
 	"common/crypto"
 	"common/math"
 	"golang.org/x/crypto/scrypt"
 	"golang.org/x/crypto/pbkdf2"
-	"strings"
 )
 
 const (
@@ -71,6 +69,7 @@ const (
 
 type keyStorePassphrase struct {
 	keysDirPath string
+	address     string
 	scryptN     int
 	scryptP     int
 	// skipKeyFileVerification disables the security-feature which does
@@ -81,11 +80,10 @@ type keyStorePassphrase struct {
 }
 
 func (ks keyStorePassphrase) GetAddress() string {
-	temp := strings.Split(ks.keysDirPath, "/")
-	return temp[len(temp)-1]
+	return ks.address
 }
 
-func (ks keyStorePassphrase) GetKey(addr common.Address, filename, auth string) (*Key, error) {
+func (ks keyStorePassphrase) GetKey(addr, filename, auth string) (*Key, error) {
 	// Load the key from the keystore and decrypt its contents
 	keyjson, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -104,7 +102,7 @@ func (ks keyStorePassphrase) GetKey(addr common.Address, filename, auth string) 
 
 // StoreKey generates a key, encrypts with 'auth' and stores in the given directory
 func StoreKey(dir, auth string, scryptN, scryptP int) (string, error) {
-	_, address, err := storeNewKey(&keyStorePassphrase{dir, scryptN, scryptP, false, nil}, rand.Reader, auth)
+	_, address, err := storeNewKey(&keyStorePassphrase{dir, "",scryptN, scryptP, false, nil}, rand.Reader, auth)
 	return address, err
 }
 
@@ -113,7 +111,7 @@ func (ks keyStorePassphrase) StoreKey(filename string, key *Key, auth string) er
 	if err != nil {
 		return err
 	}
-	filename = ks.keysDirPath + "/" + filename
+	filename = ks.JoinPath(filename)
 	// Write into temporary file
 	tmpName, err := writeTemporaryKeyFile(filename, keyjson)
 	if err != nil {
@@ -132,8 +130,8 @@ func (ks keyStorePassphrase) StoreKey(filename string, key *Key, auth string) er
 			return fmt.Errorf(msg, tmpName, err)
 		}
 	}
-	ks.keysDirPath = filename
 	ks.keyjson = keyjson
+	ks.address = key.Address
 	return os.Rename(tmpName, filename)
 }
 
@@ -197,7 +195,7 @@ func EncryptKey(key *Key, auth string, scryptN, scryptP int) ([]byte, error) {
 		return nil, err
 	}
 	encryptedKeyJSONV3 := encryptedKeyJSONV3{
-		hex.EncodeToString(key.Address[:]),
+		key.Address,
 		cryptoStruct,
 		key.Id.String(),
 		version,

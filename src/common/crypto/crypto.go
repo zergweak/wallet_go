@@ -176,11 +176,11 @@ func GenerateKey() (*ecdsa.PrivateKey, error) {
 	return ecdsa.GenerateKey(S256(), rand.Reader)
 }
 
-func PubkeyToAddress(p ecdsa.PublicKey) common.Address {
+func PubkeyToAddress(p ecdsa.PublicKey) string {
 	pubBytes := FromECDSAPub(&p)
 	address := Keccak256(pubBytes[1:])[11:]
 	address[0] = 0x41
-	return common.BytesToAddress(address)
+	return B58checkencode(address)
 }
 
 func zeroBytes(bytes []byte) {

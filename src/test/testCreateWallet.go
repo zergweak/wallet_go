@@ -4,6 +4,7 @@ import (
 	_ "common/crypto/sha3"
 	"common/accounts/keystore"
 	"fmt"
+	"encoding/hex"
 )
 
 const (
@@ -23,5 +24,9 @@ func main() {
 	for i := 0; i< len(ks.Accounts); i++  {
 		account := ks.Accounts[i]
 		fmt.Println(account.GetAddress())
+		key,_ := account.GetKey(account.GetAddress(), account.JoinPath(account.GetAddress()),"foo")
+		fmt.Println(key.Id.String())
+		fmt.Println(key.Address)
+		fmt.Println(hex.EncodeToString(key.PrivateKey.D.Bytes()))
 	}
 }

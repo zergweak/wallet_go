@@ -1,7 +1,6 @@
 package keystore
 
 import (
-	"common"
 	"common/uuid"
 	"crypto/ecdsa"
 	"io"
@@ -9,7 +8,6 @@ import (
 	"path/filepath"
 	"io/ioutil"
 	"os"
-	cryp "common/crypto"
 )
 
 const (
@@ -19,7 +17,7 @@ const (
 type Key struct {
 	Id uuid.UUID // Version 4 "random" for unique id not derived from key data
 	// to simplify lookups we also store the address
-	Address common.Address
+	Address string
 	// we only store privkey as pubkey/address can be derived from it
 	// privkey in this struct is always in plaintext
 	PrivateKey *ecdsa.PrivateKey
@@ -55,7 +53,7 @@ type CryptoJSON struct {
 type keyStore interface {
 	GetAddress() string
 	// Loads and decrypts the key from disk.
-	GetKey(addr common.Address, filename string, auth string) (*Key, error)
+	GetKey(addr, filename, auth string) (*Key, error)
 	// Writes and encrypts the key.
 	StoreKey(filename string, k *Key, auth string) error
 	// Joins filename with the key directory unless it is already absolute.
@@ -85,7 +83,7 @@ func storeNewKey(ks keyStore, rand io.Reader, auth string) (*Key, string, error)
 	if err != nil {
 		return nil, "", err
 	}
-	address := cryp.B58checkencode(key.Address.Bytes())
+	address := key.Address
 	if err := ks.StoreKey(address, key, auth); err != nil {
 		zeroKey(key.PrivateKey)
 		return nil, address, err
