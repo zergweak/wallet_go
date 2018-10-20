@@ -178,7 +178,9 @@ func GenerateKey() (*ecdsa.PrivateKey, error) {
 
 func PubkeyToAddress(p ecdsa.PublicKey) common.Address {
 	pubBytes := FromECDSAPub(&p)
-	return common.BytesToAddress(Keccak256(pubBytes[1:])[12:])
+	address := Keccak256(pubBytes[1:])[11:]
+	address[0] = 0x41
+	return common.BytesToAddress(address)
 }
 
 func zeroBytes(bytes []byte) {
