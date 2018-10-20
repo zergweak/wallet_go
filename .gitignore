@@ -1,6 +1,7 @@
 .idea
 .DS_Store
 pkg
+keystore
 src/.DS_Store
 src/github.com
 src/golang.org
