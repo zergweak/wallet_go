@@ -17,7 +17,7 @@ var (
 
 // KeyStore manages a key storage directory on disk.
 type KeyStore struct {
-	accounts    []keyStore // Storage backend, might be cleartext or encrypted
+	Accounts    []keyStore // Storage backend, might be cleartext or encrypted
 	keysDirPath string
 	scryptN     int
 	scryptP     int
@@ -32,7 +32,7 @@ func (ks *KeyStore) walkfunc(path string, info os.FileInfo, err error) error {
 		return nil
 	}
 	account := keyStorePassphrase{path, ks.scryptN, ks.scryptP, false, keyjson}
-	ks.accounts = append(ks.accounts, account)
+	ks.Accounts = append(ks.Accounts, account)
 	return nil
 }
 
@@ -90,7 +90,7 @@ func (ks *KeyStore) NewAccount(passphrase string) (string, error) {
 		return "", err
 	}
 	account.keysDirPath = account.JoinPath(address)
-	ks.accounts = append(ks.accounts, account)
+	ks.Accounts = append(ks.Accounts, account)
 	// Add the account to the cache immediately rather
 	// than waiting for file system notifications to pick it up.
 	return address, nil

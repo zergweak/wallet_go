@@ -20,4 +20,8 @@ func main() {
 		fmt.Println(err.Error())
 	}
 	fmt.Println(address)
+	for i := 0; i< len(ks.Accounts); i++  {
+		account := ks.Accounts[i]
+		fmt.Println(account.GetAddress())
+	}
 }
