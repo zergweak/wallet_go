@@ -53,6 +53,7 @@ type CryptoJSON struct {
 }
 
 type keyStore interface {
+	GetAddress() string
 	// Loads and decrypts the key from disk.
 	GetKey(addr common.Address, filename string, auth string) (*Key, error)
 	// Writes and encrypts the key.

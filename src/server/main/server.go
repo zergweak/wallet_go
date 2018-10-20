@@ -9,7 +9,6 @@ import (
 	"google.golang.org/grpc"
 	pb "api"
 	"common/accounts/keystore"
-	cryp "common/crypto"
 )
 
 const (
@@ -29,11 +28,10 @@ func (s *server) Signature(ctx context.Context, in *pb.AddressPasswordHashMessag
 
 func (s *server) CreateWallet(ctx context.Context, in *pb.PasswordMessage) (*pb.AddressMessage, error) {
 	ks := keystore.NewKeyStore("keystore", veryLightScryptN, veryLightScryptP)
-	a, err := ks.NewAccount("foo")
+	address, err := ks.NewAccount("foo")
 	if nil != err {
 		return nil, err
 	}
-	address := cryp.B58checkencode(a.Address.Bytes())
 	return &pb.AddressMessage{Address: address}, nil
 }
 

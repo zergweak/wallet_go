@@ -9,11 +9,12 @@ import (
 const (
 	veryLightScryptN = 2
 	veryLightScryptP = 1
+	root             = "keystore"
 )
 
-func main()  {
+func main() {
 
-	ks := keystore.NewKeyStore("keystore", veryLightScryptN, veryLightScryptP)
+	ks := keystore.NewKeyStore(root, veryLightScryptN, veryLightScryptP)
 	address, err := ks.NewAccount("foo")
 	if err != nil {
 		fmt.Println(err.Error())
