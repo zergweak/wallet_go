@@ -79,5 +79,5 @@ func (w *keystoreWallet) SignHashWithPassphrase(account accounts.Account, passph
 		return nil, accounts.ErrUnknownAccount
 	}
 	// Account seems valid, request the keystore to sign
-	return w.keystore.SignHashWithPassphrase(account, passphrase, hash)
+	return w.keystore.SignHashWithPassphrase(account.Address, passphrase, hash)
 }

@@ -24,7 +24,11 @@ func main() {
 	for i := 0; i< len(ks.Accounts); i++  {
 		account := ks.Accounts[i]
 		fmt.Println(account.GetAddress())
-		key,_ := account.GetKey(account.GetAddress(), account.JoinPath(account.GetAddress()),"foo")
+		key,err := account.GetKey(account.GetAddress(), account.JoinPath(account.GetAddress()),"faa")
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
 		fmt.Println(key.Id.String())
 		fmt.Println(key.Address)
 		fmt.Println(hex.EncodeToString(key.PrivateKey.D.Bytes()))

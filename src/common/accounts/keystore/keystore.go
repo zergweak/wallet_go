@@ -8,6 +8,7 @@ import (
 	"os"
 	"io/ioutil"
 	"strings"
+	"github.com/sasaxie/go-client-api/common/crypto"
 )
 
 var (
@@ -33,7 +34,7 @@ func (ks *KeyStore) walkfunc(path string, info os.FileInfo, err error) error {
 		return nil
 	}
 	temp := strings.Split(path, "/")
-	account := keyStorePassphrase{ks.keysDirPath, temp[len(temp)-1],ks.scryptN, ks.scryptP, false, keyjson}
+	account := keyStorePassphrase{ks.keysDirPath, temp[len(temp)-1], ks.scryptN, ks.scryptP, false, keyjson}
 	ks.Accounts = append(ks.Accounts, account)
 	return nil
 }
@@ -46,7 +47,16 @@ func (ks *KeyStore) init() {
 		_ = os.Mkdir(ks.keysDirPath, 0700)
 	}
 	filepath.Walk(ks.keysDirPath, ks.walkfunc)
-	//	ks := &KeyStore{storage: &keyStorePassphrase{keydir, scryptN, scryptP, false}}
+}
+
+func (ks *KeyStore) find(address string) keyStore {
+	for i := 0; i < len(ks.Accounts); i++ {
+		account := ks.Accounts[i]
+		if address == account.GetAddress(){
+			return account
+		}
+	}
+	return nil
 }
 
 // SignHash calculates a ECDSA signature for the given hash. The produced
@@ -65,14 +75,17 @@ func (ks *KeyStore) SignHash(a accounts.Account, hash []byte) ([]byte, error) {
 // SignHashWithPassphrase signs hash if the private key matching the given address
 // can be decrypted with the given passphrase. The produced signature is in the
 // [R || S || V] format where V is 0 or 1.
-func (ks *KeyStore) SignHashWithPassphrase(a accounts.Account, passphrase string, hash []byte) (signature []byte, err error) {
-	//_, key, err := ks.getDecryptedKey(a, passphrase)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//defer zeroKey(key.PrivateKey)
-	//return crypto.Sign(hash, key.PrivateKey)
-	return nil, nil
+func (ks *KeyStore) SignHashWithPassphrase(address, passphrase string, hash []byte) (signature []byte, err error) {
+	account := ks.find(address)
+	if account == nil {
+		 return  nil, ErrNoMatch
+	}
+	key, err := account.GetKey(address, "", passphrase)
+	if err != nil {
+		return nil, err
+	}
+	defer zeroKey(key.PrivateKey)
+	return crypto.Sign(hash, key.PrivateKey)
 }
 
 // NewKeyStore creates a keystore for the given directory.
@@ -86,7 +99,7 @@ func NewKeyStore(keydir string, scryptN, scryptP int) *KeyStore {
 // NewAccount generates a new key and stores it into the key directory,
 // encrypting it with the passphrase.
 func (ks *KeyStore) NewAccount(passphrase string) (string, error) {
-	account := keyStorePassphrase{ks.keysDirPath, "",ks.scryptN, ks.scryptP, false, nil}
+	account := keyStorePassphrase{ks.keysDirPath, "", ks.scryptN, ks.scryptP, false, nil}
 	_, address, err := storeNewKey(account, crand.Reader, passphrase)
 	if err != nil {
 		return "", err

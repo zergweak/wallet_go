@@ -15,24 +15,24 @@ const (
 	port             = ":50051"
 	veryLightScryptN = 2
 	veryLightScryptP = 1
+	root             = "keystore"
 )
 
 type server struct{}
 
 func (s *server) Signature(ctx context.Context, in *pb.AddressPasswordHashMessage) (*pb.SignatureMessage, error) {
-	ss := []byte(in.Password)
-	ss = append(ss, in.Hash[:]...)
-	ss = append(ss, []byte(in.Address)[:]...)
-	return &pb.SignatureMessage{Signature: ss}, nil
+	ks := keystore.NewKeyStore(root, veryLightScryptN, veryLightScryptP)
+	signature, err := ks.SignHashWithPassphrase(in.Address, in.Password, in.Hash)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.SignatureMessage{Signature: signature}, err
 }
 
 func (s *server) CreateWallet(ctx context.Context, in *pb.PasswordMessage) (*pb.AddressMessage, error) {
-	ks := keystore.NewKeyStore("keystore", veryLightScryptN, veryLightScryptP)
-	address, err := ks.NewAccount("foo")
-	if nil != err {
-		return nil, err
-	}
-	return &pb.AddressMessage{Address: address}, nil
+	ks := keystore.NewKeyStore(root, veryLightScryptN, veryLightScryptP)
+	address, err := ks.NewAccount(in.Password)
+	return &pb.AddressMessage{Address: address}, err
 }
 
 func main() {

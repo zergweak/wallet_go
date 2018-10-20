@@ -85,6 +85,9 @@ func (ks keyStorePassphrase) GetAddress() string {
 
 func (ks keyStorePassphrase) GetKey(addr, filename, auth string) (*Key, error) {
 	// Load the key from the keystore and decrypt its contents
+	if filename == "" {
+		filename = ks.JoinPath(ks.address)
+	}
 	keyjson, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
