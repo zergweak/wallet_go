@@ -2,13 +2,13 @@ package keystore
 
 import (
 	"common/accounts"
-	"errors"
-	"path/filepath"
+	"common/crypto/secp256k1"
 	crand "crypto/rand"
-	"os"
+	"errors"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
-	"github.com/sasaxie/go-client-api/common/crypto"
 )
 
 var (
@@ -52,7 +52,7 @@ func (ks *KeyStore) init() {
 func (ks *KeyStore) find(address string) keyStore {
 	for i := 0; i < len(ks.Accounts); i++ {
 		account := ks.Accounts[i]
-		if address == account.GetAddress(){
+		if address == account.GetAddress() {
 			return account
 		}
 	}
@@ -78,14 +78,15 @@ func (ks *KeyStore) SignHash(a accounts.Account, hash []byte) ([]byte, error) {
 func (ks *KeyStore) SignHashWithPassphrase(address, passphrase string, hash []byte) (signature []byte, err error) {
 	account := ks.find(address)
 	if account == nil {
-		 return  nil, ErrNoMatch
+		return nil, ErrNoMatch
 	}
 	key, err := account.GetKey(address, "", passphrase)
 	if err != nil {
 		return nil, err
 	}
 	defer zeroKey(key.PrivateKey)
-	return crypto.Sign(hash, key.PrivateKey)
+	signature, err = secp256k1.SignCompact(secp256k1.S256(), (*secp256k1.PrivateKey)(key.PrivateKey), hash, true)
+	return signature, err
 }
 
 // NewKeyStore creates a keystore for the given directory.
