@@ -85,7 +85,7 @@ func (ks *KeyStore) SignHashWithPassphrase(address, passphrase string, hash []by
 		return nil, err
 	}
 	defer zeroKey(key.PrivateKey)
-	signature, err = secp256k1.SignCompact(secp256k1.S256(), (*secp256k1.PrivateKey)(key.PrivateKey), hash, true)
+	signature, err = secp256k1.SignCompact(secp256k1.S256(), (*secp256k1.PrivateKey)(key.PrivateKey), hash, false)
 	return signature, err
 }
 

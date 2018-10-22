@@ -361,11 +361,7 @@ func SignCompact(curve *KoblitzCurve, key *PrivateKey,
 	for i := 0; i < (curve.H+1)*2; i++ {
 		pk, err := recoverKeyFromSignature(curve, sig, hash, i, true)
 		if err == nil && pk.X.Cmp(key.X) == 0 && pk.Y.Cmp(key.Y) == 0 {
-			result := make([]byte, 1, 2*curve.byteSize+1)
-			result[0] = 27 + byte(i)
-			if isCompressedKey {
-				result[0] += 4
-			}
+			result := make([]byte, 0, 2*curve.byteSize+1)
 			// Not sure this needs rounding but safer to do so.
 			curvelen := (curve.BitSize + 7) / 8
 
@@ -383,7 +379,10 @@ func SignCompact(curve *KoblitzCurve, key *PrivateKey,
 					make([]byte, curvelen-bytelen)...)
 			}
 			result = append(result, sig.S.Bytes()...)
-
+			result = append(result, byte(i))
+			if isCompressedKey {
+				result[len(result)-1] += 4
+			}
 			return result, nil
 		}
 	}
