@@ -1,10 +1,17 @@
 syntax = "proto3";
+package protocol;
 
-package api;
+import "core/Tron.proto";
 
 service wallet_api {
     rpc CreateWallet(PasswordMessage) returns(AddressMessage){};
     rpc Signature(AddressPasswordHashMessage) returns(SignatureMessage){};
+    rpc SignatureTx(SignatureTxMessage) returns (Transaction) {};
+}
+
+message SignatureTxMessage {
+    Transaction transaction = 1;
+    string password = 2;
 }
 
 message AddressPasswordHashMessage {
