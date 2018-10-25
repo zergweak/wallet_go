@@ -7,7 +7,7 @@ import (
 	"log"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	pb "api"
+	pb "protocol/api"
 	"common/accounts/keystore"
 )
 

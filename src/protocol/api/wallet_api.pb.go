@@ -6,10 +6,10 @@ package protocol
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	core "protocol/api/github.com/tronprotocol/grpc-gateway/core"
 	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 	math "math"
+	core "protocol/core"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
