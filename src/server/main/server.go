@@ -3,13 +3,13 @@ package main
 // server.go
 
 import (
-	"net"
-	"log"
+	"common/accounts/keystore"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"log"
+	"net"
 	pb "protocol/api"
-	 "protocol/protocol/core"
-	"common/accounts/keystore"
+	"protocol/core"
 )
 
 const (

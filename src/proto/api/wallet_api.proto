@@ -1,6 +1,8 @@
 syntax = "proto3";
 package protocol;
 
+option go_package = "api";
+
 import "core/Tron.proto";
 
 service wallet_api {
