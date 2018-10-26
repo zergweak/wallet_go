@@ -9,7 +9,7 @@ import (
 	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 	math "math"
-	core "protocol/core"
+	core "protocol/protocol/core"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

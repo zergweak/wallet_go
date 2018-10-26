@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	pb "protocol/api"
+	 "protocol/protocol/core"
 	"common/accounts/keystore"
 )
 
@@ -35,6 +36,9 @@ func (s *server) CreateWallet(ctx context.Context, in *pb.PasswordMessage) (*pb.
 	return &pb.AddressMessage{Address: address}, err
 }
 
+func (s *server) SignatureTx(ctx context.Context, in *pb.SignatureTxMessage) (*core.Transaction, error) {
+	return nil,nil
+}
 func main() {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
