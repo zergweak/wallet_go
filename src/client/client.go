@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"common/crypto"
+	"common/util"
 	"encoding/hex"
 	"fmt"
 	"golang.org/x/net/context"
@@ -80,13 +81,12 @@ func GetAccount(conn *grpc.ClientConn, parameters []string) {
 		log.Println("GetAccount need 1 parameters : address.")
 		return
 	}
-	fmt.Println(parameters[0])
 	address := crypto.B58checkdecode(parameters[0])
-	r, err := c.GetAccount(context.Background(), &core.Account{Address:address})
+	r, err := c.GetAccount(context.Background(), &core.Account{Address: address})
 	if err != nil {
-		log.Printf("GetAccount faild: %v", err)
+		fmt.Printf("GetAccount faild: %v", err)
 	} else {
-		log.Printf("Account of address %s is balance is %d", crypto.B58checkencode(r.GetAddress()), r.GetBalance())
+		fmt.Printf("Account detail of address %s is : %s", parameters[0], util.PrintAccount(*r))
 	}
 }
 
@@ -117,13 +117,13 @@ func run() {
 			CreateWallet(conn_0)
 			break
 		case strings.ToLower("Signature"):
-			Signature(conn_0,parameters)
+			Signature(conn_0, parameters)
 			break
 		case strings.ToLower("GetNowBlock"):
 			GetNowBlock(conn_1)
 			break
 		case strings.ToLower("GetAccount"):
-			GetAccount(conn_1,parameters)
+			GetAccount(conn_1, parameters)
 			break
 		case strings.ToLower("Exit"):
 			quit = true
