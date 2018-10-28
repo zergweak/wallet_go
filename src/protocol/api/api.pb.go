@@ -4,7 +4,7 @@
 package api
 
 import (
-	core "core"
+	core "protocol/core"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
 	context "golang.org/x/net/context"

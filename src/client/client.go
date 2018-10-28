@@ -1,19 +1,22 @@
 package main
 
 import (
-	"google.golang.org/grpc"
-	"golang.org/x/net/context"
-	"log"
-	pb "protocol/api"
-	"os"
-	"fmt"
 	"bufio"
-	"strings"
+	"common/crypto"
 	"encoding/hex"
+	"fmt"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"log"
+	"os"
+	pb "protocol/api"
+	"protocol/core"
+	"strings"
 )
 
 const (
-	address = "localhost:50051"
+	wallet_address   = "localhost:50051"
+	fullnode_address = "54.236.37.243:50051"
 )
 
 func inputpassword() string {
@@ -61,12 +64,43 @@ func Signature(conn *grpc.ClientConn, parameters []string) {
 	}
 }
 
+func GetNowBlock(conn *grpc.ClientConn) {
+	c := pb.NewWalletClient(conn)
+	r, err := c.GetNowBlock2(context.Background(), &pb.EmptyMessage{})
+	if err != nil {
+		log.Printf("GetNowBlock faild: %v", err)
+	} else {
+		log.Printf("Current block number : %d", r.BlockHeader.GetRawData().GetNumber())
+	}
+}
+
+func GetAccount(conn *grpc.ClientConn, parameters []string) {
+	c := pb.NewWalletClient(conn)
+	if len(parameters) != 1 {
+		log.Println("GetAccount need 1 parameters : address.")
+		return
+	}
+	fmt.Println(parameters[0])
+	address := crypto.B58checkdecode(parameters[0])
+	r, err := c.GetAccount(context.Background(), &core.Account{Address:address})
+	if err != nil {
+		log.Printf("GetAccount faild: %v", err)
+	} else {
+		log.Printf("Account of address %s is balance is %d", crypto.B58checkencode(r.GetAddress()), r.GetBalance())
+	}
+}
+
 func run() {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	conn_0, err := grpc.Dial(wallet_address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("Did not connect: %v", err)
 	}
-	defer conn.Close()
+	defer conn_0.Close()
+	conn_1, err := grpc.Dial(fullnode_address, grpc.WithInsecure())
+	if err != nil {
+		log.Fatal("Did not connect: %v", err)
+	}
+	defer conn_1.Close()
 	quit := false
 	for {
 		if quit {
@@ -80,10 +114,16 @@ func run() {
 		parameters := cmdArray[1:]
 		switch strings.ToLower(cmd) {
 		case strings.ToLower("CreateWallet"):
-			CreateWallet(conn)
+			CreateWallet(conn_0)
 			break
 		case strings.ToLower("Signature"):
-			Signature(conn, parameters)
+			Signature(conn_0,parameters)
+			break
+		case strings.ToLower("GetNowBlock"):
+			GetNowBlock(conn_1)
+			break
+		case strings.ToLower("GetAccount"):
+			GetAccount(conn_1,parameters)
 			break
 		case strings.ToLower("Exit"):
 			quit = true

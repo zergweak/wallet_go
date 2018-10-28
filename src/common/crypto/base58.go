@@ -1,9 +1,9 @@
 package crypto
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"math/big"
-	"bytes"
 )
 
 var b58Alphabet = []byte("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
@@ -69,6 +69,34 @@ func Base58Decode(str string) []byte {
 	decoded = append(bytes.Repeat([]byte{byte(0x00)}, zeroBytes), decoded...)
 
 	return decoded
+}
+
+func B58checkdecode(s string) (b []byte) {
+	bb := Base58Decode(s)
+	if len(bb) != 25 {
+		return nil
+	}
+	b = bb[:21]
+	check := bb[21:25]
+	/* Create a new SHA256 context */
+	sha256H := sha256.New()
+
+	/* SHA256 Hash #1 */
+	sha256H.Reset()
+	sha256H.Write(b)
+	hash1 := sha256H.Sum(nil)
+
+	/* SHA256 Hash #2 */
+	sha256H.Reset()
+	sha256H.Write(hash1)
+	hash2 := sha256H.Sum(nil)
+
+	check_1 := hash2[0:4]
+
+	if !bytes.Equal(check, check_1) {
+		return nil
+	}
+	return b
 }
 
 func B58checkencode(b []byte) (s string) {
