@@ -12,6 +12,7 @@ import (
 	"os"
 	pb "protocol/api"
 	"protocol/core"
+	"strconv"
 	"strings"
 )
 
@@ -65,6 +66,40 @@ func Signature(conn *grpc.ClientConn, parameters []string) {
 	}
 }
 
+func SendCoin(connFullNode, connWallet *grpc.ClientConn, parameters []string) {
+	if len(parameters) != 4 {
+		log.Println("SendCoin need 3 parameters : From To Amount and  passphrase.")
+		return
+	}
+	from := crypto.B58checkdecode(parameters[0])
+	to := crypto.B58checkdecode(parameters[1])
+	amount, err := strconv.ParseInt(parameters[2], 10, 64)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	passphrase := parameters[3]
+	cF := pb.NewWalletClient(connFullNode)
+	contract := core.TransferContract{OwnerAddress: from, ToAddress: to, Amount: amount}
+	transaction, err := cF.CreateTransaction(context.Background(), &contract)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	cW := pb.NewWalletApiClient(connFullNode)
+	message := pb.SignatureTxMessage{Transaction: transaction, Password: passphrase}
+	transaction, err = cW.SignatureTx(context.Background(), &message)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	ret, err := cF.BroadcastTransaction(context.Background(), transaction)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println(ret)
+}
 func GetNowBlock(conn *grpc.ClientConn) {
 	c := pb.NewWalletClient(conn)
 	r, err := c.GetNowBlock2(context.Background(), &pb.EmptyMessage{})
@@ -118,6 +153,9 @@ func run() {
 			break
 		case strings.ToLower("Signature"):
 			Signature(conn_0, parameters)
+			break
+		case strings.ToLower("SendCoin"):
+			SendCoin(conn_0, parameters)
 			break
 		case strings.ToLower("GetNowBlock"):
 			GetNowBlock(conn_1)
