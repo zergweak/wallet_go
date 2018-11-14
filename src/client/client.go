@@ -7,18 +7,12 @@ import (
 	"encoding/hex"
 	"fmt"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"log"
 	"os"
 	pb "protocol/api"
 	"protocol/core"
 	"strconv"
 	"strings"
-)
-
-const (
-	wallet_address   = "localhost:50051"
-	fullnode_address = "54.236.37.243:50051"
 )
 
 func inputpassword() string {
@@ -40,9 +34,9 @@ func inputpassword() string {
 	}
 }
 
-func CreateWallet(conn *grpc.ClientConn) {
+func CreateWallet() {
 	pwd := inputpassword()
-	c := pb.NewWalletApiClient(conn)
+	c := util.GetWalletCli()
 	address, err := c.CreateWallet(context.Background(), &pb.PasswordMessage{Password: pwd})
 	if err != nil {
 		log.Printf("CreateWallet faild: %v", err)
@@ -51,8 +45,8 @@ func CreateWallet(conn *grpc.ClientConn) {
 	}
 }
 
-func Signature(conn *grpc.ClientConn, parameters []string) {
-	c := pb.NewWalletApiClient(conn)
+func Signature(parameters []string) {
+	c := util.GetWalletCli()
 	if len(parameters) != 2 {
 		log.Println("Signature need 2 parameters : address and passphrase.")
 		return
@@ -66,7 +60,7 @@ func Signature(conn *grpc.ClientConn, parameters []string) {
 	}
 }
 
-func SendCoin(connFullNode, connWallet *grpc.ClientConn, parameters []string) {
+func SendCoin(parameters []string) {
 	if len(parameters) != 4 {
 		log.Println("SendCoin need 3 parameters : From To Amount and  passphrase.")
 		return
@@ -79,14 +73,14 @@ func SendCoin(connFullNode, connWallet *grpc.ClientConn, parameters []string) {
 		return
 	}
 	passphrase := parameters[3]
-	cF := pb.NewWalletClient(connFullNode)
+	cF := util.GetFullCli()
 	contract := core.TransferContract{OwnerAddress: from, ToAddress: to, Amount: amount}
 	transaction, err := cF.CreateTransaction(context.Background(), &contract)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	cW := pb.NewWalletApiClient(connFullNode)
+	cW := util.GetWalletCli()
 	message := pb.SignatureTxMessage{Transaction: transaction, Password: passphrase}
 	transaction, err = cW.SignatureTx(context.Background(), &message)
 	if err != nil {
@@ -100,8 +94,8 @@ func SendCoin(connFullNode, connWallet *grpc.ClientConn, parameters []string) {
 	}
 	log.Println(ret)
 }
-func GetNowBlock(conn *grpc.ClientConn) {
-	c := pb.NewWalletClient(conn)
+func GetNowBlock() {
+	c := util.GetFullCli()
 	r, err := c.GetNowBlock2(context.Background(), &pb.EmptyMessage{})
 	if err != nil {
 		log.Printf("GetNowBlock faild: %v", err)
@@ -110,8 +104,8 @@ func GetNowBlock(conn *grpc.ClientConn) {
 	}
 }
 
-func GetAccount(conn *grpc.ClientConn, parameters []string) {
-	c := pb.NewWalletClient(conn)
+func GetAccount(parameters []string) {
+	c := util.GetFullCli()
 	if len(parameters) != 1 {
 		log.Println("GetAccount need 1 parameters : address.")
 		return
@@ -119,23 +113,13 @@ func GetAccount(conn *grpc.ClientConn, parameters []string) {
 	address := crypto.B58checkdecode(parameters[0])
 	r, err := c.GetAccount(context.Background(), &core.Account{Address: address})
 	if err != nil {
-		fmt.Printf("GetAccount faild: %v", err)
+		fmt.Printf("GetAccount faild: %v\n", err)
 	} else {
-		fmt.Printf("Account detail of address %s is : %s", parameters[0], util.PrintAccount(*r))
+		fmt.Printf("Account detail of address %s is : %s\n", parameters[0], util.PrintAccount(*r))
 	}
 }
 
 func run() {
-	conn_0, err := grpc.Dial(wallet_address, grpc.WithInsecure())
-	if err != nil {
-		log.Fatal("Did not connect: %v", err)
-	}
-	defer conn_0.Close()
-	conn_1, err := grpc.Dial(fullnode_address, grpc.WithInsecure())
-	if err != nil {
-		log.Fatal("Did not connect: %v", err)
-	}
-	defer conn_1.Close()
 	quit := false
 	for {
 		if quit {
@@ -149,19 +133,19 @@ func run() {
 		parameters := cmdArray[1:]
 		switch strings.ToLower(cmd) {
 		case strings.ToLower("CreateWallet"):
-			CreateWallet(conn_0)
+			CreateWallet()
 			break
 		case strings.ToLower("Signature"):
-			Signature(conn_0, parameters)
+			Signature(parameters)
 			break
 		case strings.ToLower("SendCoin"):
-			SendCoin(conn_0, parameters)
+			SendCoin(parameters)
 			break
 		case strings.ToLower("GetNowBlock"):
-			GetNowBlock(conn_1)
+			GetNowBlock()
 			break
 		case strings.ToLower("GetAccount"):
-			GetAccount(conn_1, parameters)
+			GetAccount(parameters)
 			break
 		case strings.ToLower("Exit"):
 			quit = true
@@ -178,5 +162,6 @@ func run() {
 
 func main() {
 	fmt.Println("wallet_go_client runing.")
+	util.InitClient()
 	run()
 }
