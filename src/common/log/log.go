@@ -1,17 +1,26 @@
 package log
 
 import (
-	"log"
+	"fmt"
 	"os"
 )
 
-func Print(value string)  {
+var logFile *os.File
+
+func Init() {
 	fileName := "Log.log"
-	logFile,err  := os.Create(fileName)
-	defer logFile.Close()
+	var err error
+	logFile, err = os.OpenFile(fileName, os.O_WRONLY, 0644)
+
 	if err != nil {
-		log.Fatalln("open file error")
+		fmt.Println("open file error")
 	}
-	debugLog := log.New(logFile,"[Info]",log.Llongfile)
-	debugLog.Println(value)
+	//defer logFile.Close()
+	logFile.Seek(0, os.SEEK_END)
+	logFile.WriteString("Init\n")
+}
+
+func Print(value string) {
+	logFile.Seek(0, os.SEEK_END)
+	logFile.WriteString(value)
 }
