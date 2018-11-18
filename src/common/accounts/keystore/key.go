@@ -1,13 +1,14 @@
 package keystore
 
 import (
+	"common/crypto"
 	"common/uuid"
 	"crypto/ecdsa"
+	crand "crypto/rand"
 	"io"
-	"common/crypto"
-	"path/filepath"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 const (
@@ -89,6 +90,14 @@ func storeNewKey(ks keyStore, rand io.Reader, auth string) (*Key, string, error)
 		return nil, address, err
 	}
 	return key, address, err
+}
+
+func GenNewKey() (*Key, error) {
+	key, err := newKey(crand.Reader)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
 }
 
 // zeroKey zeroes a private key in memory.
