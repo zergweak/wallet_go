@@ -9,5 +9,8 @@ src/google.golang.org
 src/client/airdrop.go
 src/client/clearAsset.go
 src/client/pati.go
+src/client/asset
+src/client/asset/assetinfo.go
+src/client/getbalance.go
 Log.log
 db/
