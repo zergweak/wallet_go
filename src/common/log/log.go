@@ -27,6 +27,7 @@ func Print(value string) {
 }
 
 func Println(value string) {
+	fmt.Println(value)
 	logFile.Seek(0, os.SEEK_END)
 	logFile.WriteString(value)
 	logFile.WriteString("\n")
